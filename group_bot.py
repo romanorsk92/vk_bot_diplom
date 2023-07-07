@@ -34,13 +34,26 @@ class GroupBot():
                     self.send_message(event.user_id, f'''привет {self.search_params['name']} Можем попробовать поискать  тебе пару  для этого необходимо проверить все ли данные анкеты заполнены!''', attachment=None)
                     if self.search_params['sex'] == 0:
                         self.send_message(event.user_id, f'У тебя не указан пол. Введи 1 - если твой пол женский или 2 - если твой пол мужской!', attachment=None)
-                        self.search_params['sex'] = request
+                        for event in self.longpoll.listen():
+                            if event.type == VkEventType.MESSAGE_NEW and event.to_me:
+                                user_sex = event.text
+        
+                                self.search_params['sex'] = user_sex
+                                break
                     if self.search_params['city'] == None:
                         self.send_message(event.user_id, f'У тебя не указан город! Введи его ...', attachment=None)
-                        self.search_params['city'] = request
+                        for event in self.longpoll.listen():
+                            if event.type == VkEventType.MESSAGE_NEW and event.to_me:
+                                user_city = event.text
+                                self.search_params['city'] = user_city
+                                break
                     if self.search_params['age'] == None:
                         self.send_message(event.user_id, f'У вас не указан возраст. Для поиска он необходим. Введите его...', attachment=None)
-                        self.search_params['age'] = request
+                        for event in self.longpoll.listen():
+                            if event.type == VkEventType.MESSAGE_NEW and event.to_me:
+                                user_age = event.text
+                                self.search_params['age'] = user_age
+                                break
                     
                     self.send_message(event.user_id, f'Начнём? Введи "поиск" для продолжения!', attachment=None)
                     self.send_message(
@@ -55,18 +68,17 @@ class GroupBot():
                                 photo_attachment = ''
                                 for photo in photos:
                                     photo_attachment += f'photo{photo["owner_id"]}_{photo["id_photos"]},'
-                                self.offset += 50
+                                #self.offset += 50
                                 self.send_message(
                                 event.user_id, f'''{user['name']} Найти можно по ссылке vk.com/id{user['id']}''', attachment=photo_attachment)
                                 add_user(engine, event.user_id, user['id'])
                                 break
-                            else:
-                                self.offset += 50
+                            
                     else:
                         self.result_search = self.vkinder.get_result_search(self.search_params, self.offset)
-                            
+                        self.offset += 50
                 else:
-                    self.send_message(event.user_id, f'неизвестная команда!', attachment=None)
+                                self.send_message(event.user_id, f'неизвестная команда!', attachment=None)
 
 
 
